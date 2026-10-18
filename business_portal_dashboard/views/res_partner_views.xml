@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_form_portal_dashboard" model="ir.ui.view">
+        <field name="name">res.partner.form.portal.dashboard</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Portal Dashboard" name="portal_dashboard" groups="base.group_system">
+                    <group>
+                        <group string="Visibility">
+                            <field name="portal_dashboard_role"/>
+                            <field name="portal_dashboard_show_logistics"/>
+                            <field name="portal_dashboard_show_projects"/>
+                            <field name="portal_dashboard_show_tasks"/>
+                            <field name="portal_dashboard_show_empty_cards"/>
+                        </group>
+                        <group string="Display">
+                            <field name="portal_dashboard_default_period"/>
+                        </group>
+                        <group string="Notifications">
+                            <field name="portal_notification_enabled"/>
+                            <field name="portal_email_reminder_enabled"/>
+                            <field name="portal_notify_sales"/>
+                            <field name="portal_notify_purchase"/>
+                            <field name="portal_notify_billing"/>
+                            <field name="portal_notify_logistics"/>
+                            <field name="portal_notify_projects"/>
+                        </group>
+                        <group string="Reminder timing">
+                            <field name="portal_invoice_reminder_days"/>
+                            <field name="portal_quote_reminder_days"/>
+                            <field name="portal_task_reminder_days"/>
+                        </group>
+                    </group>
+                    <div class="text-muted">
+                        These options are read from the commercial company contact of the portal user.
+                    </div>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

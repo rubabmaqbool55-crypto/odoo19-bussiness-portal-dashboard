@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_business_portal_ticket_list" model="ir.ui.view">
+        <field name="name">business.portal.ticket.list</field>
+        <field name="model">business.portal.ticket</field>
+        <field name="arch" type="xml">
+            <list string="Support Tickets" default_order="create_date desc">
+                <field name="name"/>
+                <field name="subject"/>
+                <field name="partner_id"/>
+                <field name="contact_id"/>
+                <field name="category"/>
+                <field name="priority" widget="priority"/>
+                <field name="state"/>
+                <field name="resolution_type" optional="show"/>
+                <field name="resolution_expected_date" optional="hide"/>
+                <field name="resolution_completed_date" optional="hide"/>
+                <field name="customer_reply_status" optional="show"/>
+                <field name="customer_reply_pending_review" optional="show"/>
+                <field name="assigned_user_id" widget="many2one_avatar_user"/>
+                <field name="related_reference" optional="show"/>
+                <field name="create_date" optional="show"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_business_portal_ticket_form" model="ir.ui.view">
+        <field name="name">business.portal.ticket.form</field>
+        <field name="model">business.portal.ticket</field>
+        <field name="arch" type="xml">
+            <form string="Support Ticket">
+                <header>
+                    <button
+                        name="action_set_in_progress"
+                        type="object"
+                        string="Start / Continue Progress"
+                        class="btn-primary"
+                        invisible="state not in ('new', 'waiting_customer')"
+                    />
+                    <button
+                        name="action_waiting_customer"
+                        type="object"
+                        string="Request Customer Info"
+                        invisible="state not in ('new', 'in_progress')"
+                    />
+                    <button
+                        name="action_resolve"
+                        type="object"
+                        string="Resolve"
+                        class="btn-primary"
+                        invisible="state not in ('new', 'in_progress', 'waiting_customer')"
+                    />
+                    <button
+                        name="action_close"
+                        type="object"
+                        string="Close"
+                        class="btn-primary"
+                        invisible="state != 'resolved'"
+                    />
+                    <button
+                        name="action_reopen"
+                        type="object"
+                        string="Reopen"
+                        invisible="state not in ('resolved', 'closed', 'cancelled')"
+                    />
+                    <field
+                        name="state"
+                        widget="statusbar"
+                        readonly="1"
+                        statusbar_visible="new,in_progress,waiting_customer,resolved,closed"
+                    />
+                </header>
+
+                <sheet>
+                    <widget
+                        name="web_ribbon"
+                        title="Customer Replied"
+                        bg_color="text-bg-warning"
+                        invisible="not customer_reply_pending_review"
+                    />
+
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" readonly="1"/></h1>
+                        <h2><field name="subject" placeholder="Ticket subject"/></h2>
+                    </div>
+
+                    <group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="contact_id"/>
+                            <field name="category"/>
+                            <field name="priority" widget="priority"/>
+                        </group>
+                        <group>
+                            <field name="assigned_user_id" widget="many2one_avatar_user"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="date_opened" readonly="1"/>
+                            <field name="date_resolved" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <group string="Related Document">
+                        <field name="related_model"/>
+                        <field name="related_res_id"/>
+                        <field name="related_reference"/>
+                        <field name="related_url" widget="url"/>
+                    </group>
+
+                    <group string="Customer Description">
+                        <field
+                            name="description"
+                            nolabel="1"
+                            placeholder="Customer issue or request"
+                        />
+                    </group>
+
+                    <group string="Resolution &amp; Fulfilment" col="2">
+                        <field
+                            name="resolution_type"
+                            readonly="state == 'closed'"
+                        />
+                        <field
+                            name="resolution_expected_date"
+                            invisible="resolution_type not in ('replacement', 'refund', 'repair')"
+                            required="resolution_type in ('replacement', 'refund', 'repair')"
+                            readonly="state == 'closed'"
+                        />
+                        <field
+                            name="replacement_picking_id"
+                            invisible="resolution_type != 'replacement'"
+                            required="resolution_type == 'replacement'"
+                            readonly="state == 'closed'"
+                            domain="[('picking_type_code', '=', 'outgoing'), ('company_id', '=', company_id)]"
+                        />
+                        <field
+                            name="replacement_tracking_reference"
+                            invisible="resolution_type != 'replacement'"
+                            readonly="state == 'closed'"
+                        />
+                        <field
+                            name="refund_amount"
+                            invisible="resolution_type != 'refund'"
+                            required="resolution_type == 'refund'"
+                            readonly="state == 'closed'"
+                        />
+                        <field name="currency_id" invisible="1"/>
+                        <field
+                            name="credit_note_id"
+                            string="Refund Credit Note"
+                            invisible="resolution_type not in ('refund', 'credit_note')"
+                            required="resolution_type == 'credit_note'"
+                            readonly="state == 'closed'"
+                            options="{'no_create': True}"
+                            domain="[('move_type', 'in', ('out_refund', 'in_refund')), ('state', '=', 'posted'), ('company_id', '=', company_id)]"
+                            help="For a refund, select the posted credit note created by Accounting. The ticket can close only after this credit note is fully paid and reconciled."
+                        />
+                        <field
+                            name="resolution_completed_date"
+                            invisible="state not in ('resolved', 'closed')"
+                            readonly="state == 'closed' or resolution_type in ('refund', 'replacement')"
+                            help="For refunds and replacements this date is verified and filled by the system. For repairs, enter it after the work is actually completed."
+                        />
+                        <field
+                            name="resolution_note"
+                            nolabel="1"
+                            colspan="2"
+                            placeholder="Explain the approved solution to the customer..."
+                            readonly="state == 'closed'"
+                        />
+                    </group>
+
+                    <group string="Automatic Reply &amp; Response Tracking" col="2">
+                        <field name="expected_reply_type" readonly="1"/>
+                        <field name="customer_reply_status" readonly="1"/>
+                        <field name="customer_reply_pending_review" readonly="1"/>
+                        <field name="auto_reply_count" readonly="1"/>
+                        <field name="last_customer_reply_at" readonly="1"/>
+                        <field name="last_support_reply_at" readonly="1"/>
+                        <field name="last_auto_reply_at" readonly="1"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+<!--    <record id="view_business_portal_ticket_search" model="ir.ui.view">-->
+<!--        <field name="name">business.portal.ticket.search</field>-->
+<!--        <field name="model">business.portal.ticket</field>-->
+<!--        <field name="arch" type="xml">-->
+<!--            <search string="Search Support Tickets">-->
+<!--                <field name="name"/>-->
+<!--                <field name="subject"/>-->
+<!--                <field name="partner_id"/>-->
+<!--                <field name="related_reference"/>-->
+<!--                <filter name="open" string="Open" domain="[('state', 'in', ('new', 'in_progress', 'waiting_customer'))]"/>-->
+<!--                <filter name="waiting_customer" string="Waiting for Customer" domain="[('state', '=', 'waiting_customer')]"/>-->
+<!--                <filter name="customer_replied" string="Customer Replied" domain="[('customer_reply_pending_review', '=', True)]"/>-->
+<!--                <filter name="incomplete_reply" string="Incomplete Reply" domain="[('customer_reply_status', '=', 'invalid')]"/>-->
+<!--                <filter name="resolved" string="Resolved" domain="[('state', '=', 'resolved')]"/>-->
+<!--                <filter name="closed" string="Closed" domain="[('state', '=', 'closed')]"/>-->
+<!--                <separator/>-->
+<!--                <filter name="replacement" string="Replacement" domain="[('resolution_type', '=', 'replacement')]"/>-->
+<!--                <filter name="refund" string="Refund" domain="[('resolution_type', '=', 'refund')]"/>-->
+<!--                <filter name="repair" string="Repair" domain="[('resolution_type', '=', 'repair')]"/>-->
+<!--                <separator/>-->
+<!--                <filter name="my_tickets" string="Assigned to Me" domain="[('assigned_user_id', '=', uid)]"/>-->
+<!--                <group expand="0" string="Group By">-->
+<!--                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>-->
+<!--                    <filter name="group_category" string="Category" context="{'group_by': 'category'}"/>-->
+<!--                    <filter name="group_resolution" string="Resolution" context="{'group_by': 'resolution_type'}"/>-->
+<!--                    <filter name="group_partner" string="Customer" context="{'group_by': 'partner_id'}"/>-->
+<!--                    <filter name="group_assignee" string="Assigned To" context="{'group_by': 'assigned_user_id'}"/>-->
+<!--                </group>-->
+<!--            </search>-->
+<!--        </field>-->
+<!--    </record>-->
+
+    <record id="action_business_portal_tickets" model="ir.actions.act_window">
+        <field name="name">Support Tickets</field>
+        <field name="res_model">business.portal.ticket</field>
+        <field name="view_mode">list,form</field>
+<!--        <field name="search_view_id" ref="view_business_portal_ticket_search"/>-->
+        <field name="context">{'search_default_open': 1}</field>
+    </record>
+
+    <menuitem
+        id="menu_business_portal_root"
+        name="Business Portal"
+        sequence="85"
+        groups="base.group_user"
+    />
+    <menuitem
+        id="menu_business_portal_tickets"
+        name="Support Tickets"
+        parent="menu_business_portal_root"
+        action="action_business_portal_tickets"
+        sequence="10"
+        groups="base.group_user"
+    />
+</odoo>

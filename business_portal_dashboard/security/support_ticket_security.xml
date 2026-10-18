@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="business_portal_ticket_company_rule" model="ir.rule">
+        <field name="name">Business Portal Tickets: company access</field>
+        <field name="model_id" ref="model_business_portal_ticket"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+</odoo>

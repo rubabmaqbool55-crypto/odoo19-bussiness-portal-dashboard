@@ -1,0 +1,351 @@
+.bpd-analytics-section {
+    --bpd-chart-primary: #2563eb;
+    --bpd-chart-secondary: #7c3aed;
+    --bpd-chart-success: #059669;
+    --bpd-chart-warning: #d97706;
+    --bpd-chart-danger: #dc2626;
+    --bpd-chart-info: #0891b2;
+    --bpd-chart-muted: #64748b;
+    --bpd-chart-text: #475569;
+    --bpd-chart-grid: rgba(148, 163, 184, 0.22);
+
+    position: relative;
+    margin-top: 1.5rem;
+    padding: clamp(1rem, 2vw, 1.5rem);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 1.25rem;
+    background:
+        radial-gradient(circle at top right, rgba(37, 99, 235, 0.08), transparent 32%),
+        var(--bs-body-bg, #ffffff);
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.06);
+}
+
+.bpd-analytics-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.1rem;
+
+    h2 {
+        margin: 0.1rem 0 0.25rem;
+        font-size: clamp(1.35rem, 2vw, 1.75rem);
+        font-weight: 750;
+        color: var(--bs-heading-color, #0f172a);
+    }
+
+    p {
+        margin: 0;
+        max-width: 760px;
+        color: var(--bs-secondary-color, #64748b);
+    }
+}
+
+.bpd-analytics-period {
+    flex: 0 0 auto;
+    padding: 0.5rem 0.8rem;
+    border: 1px solid rgba(37, 99, 235, 0.18);
+    border-radius: 999px;
+    background: rgba(37, 99, 235, 0.08);
+    color: var(--bpd-chart-primary);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.bpd-chart-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.bpd-chart-summary-card {
+    min-width: 0;
+    padding: 0.9rem 1rem;
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    border-radius: 0.95rem;
+    background: color-mix(in srgb, var(--bs-body-bg, #ffffff) 94%, #e2e8f0 6%);
+
+    span,
+    small {
+        display: block;
+        color: var(--bs-secondary-color, #64748b);
+        font-size: 0.75rem;
+        font-weight: 650;
+    }
+
+    strong {
+        display: block;
+        overflow: hidden;
+        margin-top: 0.15rem;
+        color: var(--bs-heading-color, #0f172a);
+        font-size: clamp(1rem, 1.7vw, 1.35rem);
+        font-weight: 780;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    small {
+        margin-top: 0.15rem;
+        font-size: 0.7rem;
+    }
+}
+
+.bpd-chart-summary-card--danger {
+    border-color: rgba(220, 38, 38, 0.18);
+    background: rgba(220, 38, 38, 0.045);
+
+    strong {
+        color: var(--bpd-chart-danger);
+    }
+}
+
+.bpd-chart-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.bpd-chart-card {
+    grid-column: span 6;
+    min-width: 0;
+    padding: 1rem;
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    border-radius: 1rem;
+    background: var(--bs-body-bg, #ffffff);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.045);
+    transition: transform 180ms ease, box-shadow 180ms ease;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 32px rgba(15, 23, 42, 0.075);
+    }
+}
+
+.bpd-chart-card--trend {
+    grid-column: span 8;
+}
+
+.bpd-chart-card[data-chart-card="invoice_status"] {
+    grid-column: span 4;
+}
+
+.bpd-chart-card__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    min-height: 70px;
+    margin-bottom: 0.65rem;
+
+    h3 {
+        margin: 0.1rem 0 0.18rem;
+        color: var(--bs-heading-color, #0f172a);
+        font-size: 1.02rem;
+        font-weight: 750;
+    }
+
+    p {
+        margin: 0;
+        color: var(--bs-secondary-color, #64748b);
+        font-size: 0.78rem;
+    }
+}
+
+.bpd-chart-card__kicker {
+    color: var(--bpd-chart-primary);
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+}
+
+.bpd-chart-card__link {
+    flex: 0 0 auto;
+    color: var(--bpd-chart-primary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+.bpd-chart-canvas {
+    position: relative;
+    height: 285px;
+    min-height: 230px;
+}
+
+.bpd-chart-canvas--large {
+    height: 330px;
+}
+
+.bpd-chart-empty {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 1rem;
+    border: 1px dashed rgba(148, 163, 184, 0.35);
+    border-radius: 0.8rem;
+    color: var(--bs-secondary-color, #64748b);
+    text-align: center;
+
+    i {
+        font-size: 1.5rem;
+        opacity: 0.7;
+    }
+}
+
+.bpd-chart-loading,
+.bpd-chart-error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+    min-height: 72px;
+    margin-top: 1rem;
+    border-radius: 0.9rem;
+    color: var(--bs-secondary-color, #64748b);
+    font-size: 0.86rem;
+    font-weight: 600;
+}
+
+.bpd-chart-loading {
+    background: rgba(148, 163, 184, 0.08);
+}
+
+.bpd-chart-error {
+    border: 1px solid rgba(220, 38, 38, 0.18);
+    background: rgba(220, 38, 38, 0.055);
+    color: var(--bpd-chart-danger);
+}
+
+.bpd-chart-spinner {
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid rgba(37, 99, 235, 0.2);
+    border-top-color: var(--bpd-chart-primary);
+    border-radius: 50%;
+    animation: bpd-chart-spin 700ms linear infinite;
+}
+
+.bpd-charts-root.is-ready .bpd-chart-loading {
+    display: none;
+}
+
+@keyframes bpd-chart-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 1199.98px) {
+    .bpd-chart-summary-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .bpd-chart-card--trend,
+    .bpd-chart-card[data-chart-card="invoice_status"] {
+        grid-column: span 6;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .bpd-analytics-heading {
+        flex-direction: column;
+    }
+
+    .bpd-chart-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .bpd-chart-card,
+    .bpd-chart-card--trend,
+    .bpd-chart-card[data-chart-card="invoice_status"] {
+        grid-column: 1 / -1;
+    }
+
+    .bpd-chart-card__header {
+        min-height: 0;
+    }
+
+    .bpd-chart-canvas,
+    .bpd-chart-canvas--large {
+        height: 275px;
+    }
+}
+
+@media (max-width: 479.98px) {
+    .bpd-chart-summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .bpd-chart-card__header {
+        flex-direction: column;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bpd-chart-card {
+        transition: none;
+    }
+
+    .bpd-chart-spinner {
+        animation-duration: 1400ms;
+    }
+}
+
+.bpd-chart-warning {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+    min-height: 54px;
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(217, 119, 6, 0.22);
+    border-radius: 0.9rem;
+    background: rgba(217, 119, 6, 0.07);
+    color: #92400e;
+    font-size: 0.84rem;
+    font-weight: 600;
+}
+.bpd-chart-period-control {
+    flex: 0 0 auto;
+    min-width: 210px;
+}
+
+.bpd-chart-period-select {
+    min-height: 48px;
+    padding: 0.65rem 2.7rem 0.65rem 1rem;
+    border: 1px solid rgba(37, 99, 235, 0.24);
+    border-radius: 999px;
+    background-color: rgba(37, 99, 235, 0.06);
+    color: #2563eb;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.bpd-chart-period-select:focus {
+    border-color: #2563eb;
+    box-shadow:
+        0 0 0 0.2rem
+        rgba(37, 99, 235, 0.12);
+}
+
+@media (max-width: 767.98px) {
+    .bpd-chart-period-control {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .bpd-chart-period-select {
+        width: 100%;
+    }
+}

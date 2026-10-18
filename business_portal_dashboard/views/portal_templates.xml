@@ -1,0 +1,1327 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+    <!--
+        Portal home only:
+        - remove Odoo's right account column by setting my_details=False
+        - hide the normal document cards
+        - render a clean, full-width business launcher
+    -->
+    <template id="portal_my_home_business_dashboard" name="Full-width business workspace on portal home" inherit_id="portal.portal_my_home" priority="60">
+        <xpath expr="//t[@t-set='my_details']" position="attributes">
+            <attribute name="t-value">False</attribute>
+        </xpath>
+
+        <xpath expr="//div[hasclass('o_portal_my_home')]" position="attributes">
+            <attribute name="class" add="bpd-simple-home" separator=" "/>
+        </xpath>
+
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="before">
+            <section class="bpd-simple-workspace" aria-label="Business portal workspace">
+                <header class="bpd-simple-header">
+                    <div class="bpd-simple-header__content">
+                        <span class="bpd-simple-eyebrow">BUSINESS PORTAL</span>
+                        <h1>My business workspace</h1>
+                        <p>Open your documents and activities from one place.</p>
+                    </div>
+
+                    <a href="/my/business-dashboard" class="bpd-simple-overview">
+                        Detailed overview
+                        <i class="fa fa-arrow-right" aria-hidden="true"/>
+                    </a>
+                </header>
+
+                <t t-set="tiles" t-value="bpd_home_tiles"/>
+                <t t-call="business_portal_dashboard.business_home_tile_grid"/>
+            </section>
+        </xpath>
+    </template>
+
+    <!-- Simple launcher cards used only on /my/home. -->
+    <template id="business_home_tile_grid" name="Simple Business Home Tile Grid">
+        <section class="bpd-simple-grid">
+            <a t-foreach="tiles" t-as="tile" t-key="tile['key']" t-att-href="tile['url']" t-attf-class="bpd-simple-card bpd-simple-card--#{tile['key']}">
+                <div class="bpd-simple-card__accent"/>
+
+                <div class="bpd-simple-card__top">
+                    <span class="bpd-simple-card__icon">
+                        <i t-attf-class="fa #{tile['icon']}" aria-hidden="true"/>
+                        <span
+                            t-if="tile.get('count')"
+                            class="bpd-simple-card__badge"
+                            t-out="tile['count']"
+                        />
+                    </span>
+                    <span class="bpd-simple-card__arrow">
+                        <i class="fa fa-arrow-up" aria-hidden="true"/>
+                    </span>
+                </div>
+
+                <div class="bpd-simple-card__body">
+                    <h2 t-out="tile['title']"/>
+                </div>
+
+                <div class="bpd-simple-card__footer">
+                    <span>View</span>
+                    <i class="fa fa-long-arrow-right" aria-hidden="true"/>
+                </div>
+            </a>
+        </section>
+
+        <div t-if="not tiles" class="bpd-empty-state">
+            <i class="fa fa-folder-open-o" aria-hidden="true"/>
+            <h2>No portal sections are available</h2>
+            <p>Ask your administrator to review your portal dashboard settings.</p>
+        </div>
+    </template>
+
+    <!-- Reusable detailed cards used only on /my/business-dashboard. -->
+    <template id="business_module_card_grid" name="Business Module Card Grid">
+        <section class="bpd-module-grid">
+            <article t-foreach="cards" t-as="card" t-key="card['key']" t-attf-class="bpd-module-card bpd-module-card--#{card['key']}">
+                <header class="bpd-module-card__header">
+                    <div class="bpd-module-card__heading">
+                        <span class="bpd-module-card__kicker">BUSINESS MODULE</span>
+                        <h3 t-out="card['title']"/>
+                        <p t-out="card['subtitle']"/>
+                    </div>
+                    <a t-att-href="card['url']" class="bpd-module-card__icon" t-att-title="card['title']">
+                        <i t-attf-class="fa #{card['icon']}" aria-hidden="true"/>
+                    </a>
+                </header>
+
+                <div class="bpd-module-card__metrics">
+                    <a t-foreach="card['metrics']" t-as="metric" t-key="metric['label']" t-att-href="metric['url']" t-attf-class="bpd-module-metric #{'bpd-module-metric--danger' if metric.get('danger') else ''}">
+                        <span class="bpd-module-metric__label" t-out="metric['label']"/>
+                        <strong class="bpd-module-metric__count" t-out="metric['count']"/>
+                        <span class="bpd-module-metric__action">
+                            View
+                            <i class="fa fa-angle-right" aria-hidden="true"/>
+                        </span>
+                    </a>
+                </div>
+
+                <div t-if="card.get('summary')" class="bpd-module-card__summary">
+                    <div t-foreach="card['summary']" t-as="summary" t-key="summary['label']" t-attf-class="bpd-module-summary #{'bpd-module-summary--danger' if summary.get('danger') else ''}">
+                        <span t-out="summary['label']"/>
+                        <strong t-out="summary['value']" t-options="{'widget': 'monetary', 'display_currency': summary['currency']}"/>
+                    </div>
+                </div>
+
+                <footer class="bpd-module-card__footer">
+                    <span>Secure portal access</span>
+                    <div class="bpd-module-card__footer-actions">
+                        <a
+                            t-if="card.get('statement_url')"
+                            t-att-href="card['statement_url']"
+                            class="bpd-module-card__statement-link"
+                        >
+                            Statement
+                            <i class="fa fa-file-text-o" aria-hidden="true"/>
+                        </a>
+                        <a t-att-href="card['url']">
+                            View all
+                            <i class="fa fa-arrow-right" aria-hidden="true"/>
+                        </a>
+                    </div>
+                </footer>
+            </article>
+        </section>
+    </template>
+
+    <template id="portal_business_dashboard" name="Business Portal Dashboard">
+        <t t-call="portal.portal_layout">
+            <div class="bpd-shell bpd-dashboard-page py-4 py-lg-5">
+                <section class="bpd-dashboard-heading">
+                    <div>
+                        <span class="bpd-dashboard-heading__kicker">BUSINESS PORTAL</span>
+                        <h1>Business dashboard</h1>
+                        <p>
+                            Welcome, <strong t-out="partner.name"/>.
+                            Review your latest business documents in one place.
+                        </p>
+                    </div>
+
+                    <div class="bpd-dashboard-heading__controls">
+                        <a
+                            href="/my/business-notifications"
+                            class="bpd-notification-bell"
+                            aria-label="Open notifications"
+                            title="Notifications"
+                        >
+                            <i class="fa fa-bell-o" aria-hidden="true"/>
+                            <span
+                                t-if="notification_unread_count"
+                                class="bpd-notification-bell__count"
+                                t-out="notification_unread_count"
+                            />
+                        </a>
+
+                        <form method="get" action="/my/business-dashboard" class="bpd-dashboard-filter">
+                            <input type="hidden" name="activity_date" t-att-value="activity_date"/>
+                            <input type="hidden" name="activity_category" t-att-value="activity_category"/>
+                            <label for="bpd_period">Reporting period</label>
+                            <select id="bpd_period" name="period" class="form-select" onchange="this.form.submit()">
+                                <t t-foreach="period_labels.items()" t-as="period_item" t-key="period_item[0]">
+                                    <option t-att-value="period_item[0]" t-att-selected="period_item[0] == selected_period" t-out="period_item[1]"/>
+                                </t>
+                            </select>
+                        </form>
+                    </div>
+                </section>
+
+                <section class="bpd-global-search-panel">
+                    <div class="bpd-global-search-panel__heading">
+                        <span class="bpd-section-kicker">FIND OR BROWSE</span>
+                        <h2>Find or browse documents</h2>
+                        <p>Choose a category to browse, or enter a keyword to search across your documents.</p>
+                    </div>
+
+                    <form action="/my/business-search" method="get" class="bpd-global-search-form">
+                        <select
+                            name="category"
+                            class="form-select bpd-global-search-category"
+                            aria-label="Search category"
+                        >
+                            <option
+                                t-foreach="global_search_categories"
+                                t-as="category_item"
+                                t-key="category_item['key']"
+                                t-att-value="category_item['key']"
+                                t-out="category_item['label']"
+                            />
+                        </select>
+
+                        <span class="bpd-global-search-form__icon">
+                            <i class="fa fa-search" aria-hidden="true"/>
+                        </span>
+
+                        <input
+                            type="search"
+                            name="q"
+                            class="form-control"
+                            placeholder="Optional: product, description, reference or source..."
+                            maxlength="100"
+                            autocomplete="off"
+                        />
+
+                        <button type="submit" class="btn btn-primary">Find / Browse</button>
+                    </form>
+                </section>
+
+                <section t-if="alerts" class="bpd-alert-panel">
+                    <div class="bpd-section-heading">
+                        <div>
+                            <span class="bpd-section-kicker">ATTENTION</span>
+                            <h2>Action required</h2>
+                        </div>
+                        <span class="bpd-count-pill" t-out="len(alerts)"/>
+                    </div>
+                    <div class="bpd-alert-list">
+                        <a t-foreach="alerts" t-as="alert" t-key="alert_index" t-att-href="alert['url']" t-attf-class="bpd-alert bpd-alert--#{alert['level']}">
+                            <span class="bpd-alert-icon">
+                                <i t-attf-class="fa #{alert.get('icon', 'fa-bell-o')}" aria-hidden="true"/>
+                            </span>
+                            <span class="bpd-alert-content">
+                                <strong t-out="alert['title']"/>
+                                <span t-out="alert['text']"/>
+                            </span>
+                            <i class="fa fa-arrow-right" aria-hidden="true"/>
+                        </a>
+                    </div>
+                </section>
+
+                <t t-call="business_portal_dashboard.business_module_card_grid"/>
+
+                <section class="bpd-date-activity">
+                    <header class="bpd-date-activity__header">
+                        <div class="bpd-date-activity__heading">
+                            <span class="bpd-section-kicker">LATEST UPDATES</span>
+                            <h2>
+                                <t t-if="activity_is_today">Today's activity</t>
+                                <t t-else="">
+                                    Activity for
+                                    <span t-out="activity_date_display" t-options="{'widget': 'date'}"/>
+                                </t>
+                            </h2>
+                            <p>Select a category to review documents updated on this date.</p>
+                        </div>
+
+                        <form method="get" action="/my/business-dashboard" class="bpd-activity-date-form">
+                            <input type="hidden" name="period" t-att-value="selected_period"/>
+                            <input type="hidden" name="activity_category" t-att-value="activity_category"/>
+                            <label for="activity_date">Activity date</label>
+                            <input
+                                id="activity_date"
+                                type="date"
+                                name="activity_date"
+                                class="form-control"
+                                t-att-value="activity_date"
+                                t-att-max="activity_today"
+                                onchange="this.form.submit()"
+                            />
+                        </form>
+                    </header>
+
+                    <!-- Category buttons stay only on the main dashboard, under Today's activity. -->
+                    <nav class="bpd-activity-filters" aria-label="Activity categories">
+                        <a
+                            t-attf-href="/my/business-dashboard?period=#{selected_period}&amp;activity_date=#{activity_date}&amp;activity_category=all"
+                            t-attf-class="bpd-activity-filter #{'is-active' if activity_category == 'all' else ''}"
+                        >
+                            <i class="fa fa-th-large" aria-hidden="true"/>
+                            <span>All</span>
+                        </a>
+
+                        <a
+                            t-foreach="activity_categories"
+                            t-as="category_item"
+                            t-key="category_item['key']"
+                            t-attf-href="/my/business-dashboard?period=#{selected_period}&amp;activity_date=#{activity_date}&amp;activity_category=#{category_item['key']}"
+                            t-attf-class="bpd-activity-filter bpd-activity-filter--#{category_item['tone']} #{'is-active' if activity_category == category_item['key'] else ''}"
+                        >
+                            <i t-attf-class="fa #{category_item['icon']}" aria-hidden="true"/>
+                            <span t-out="category_item['title']"/>
+                        </a>
+                    </nav>
+
+                    <div
+                        t-attf-class="bpd-date-activity__grid #{'bpd-date-activity__grid--single' if activity_category != 'all' else ''}"
+                    >
+                        <article
+                            t-foreach="activity_groups"
+                            t-as="group"
+                            t-key="group['key']"
+                            t-attf-class="bpd-activity-column bpd-activity-column--#{group['tone']}"
+                        >
+                            <header class="bpd-activity-column__header">
+                                <span class="bpd-activity-column__icon">
+                                    <i t-attf-class="fa #{group['icon']}" aria-hidden="true"/>
+                                </span>
+                                <div>
+                                    <h3 t-out="group['title']"/>
+                                    <small>
+                                        <t t-out="group['total']"/> update(s)
+                                    </small>
+                                </div>
+                            </header>
+
+                            <div class="bpd-activity-column__list">
+                                <a
+                                    t-foreach="group['items']"
+                                    t-as="activity"
+                                    t-key="activity['key']"
+                                    t-att-href="activity['url']"
+                                    class="bpd-date-activity-item"
+                                >
+                                    <div class="bpd-date-activity-item__top">
+                                        <strong t-out="activity['title']"/>
+                                        <span
+                                            class="bpd-date-activity-item__status"
+                                            t-out="activity['status']"
+                                        />
+                                    </div>
+                                    <span
+                                        class="bpd-date-activity-item__description"
+                                        t-out="activity['description']"
+                                    />
+                                    <small
+                                        t-out="activity['date']"
+                                        t-options="{'widget': 'datetime'}"
+                                    />
+                                    <i class="fa fa-angle-right" aria-hidden="true"/>
+                                </a>
+
+                                <div t-if="not group['items']" class="bpd-activity-column__empty">
+                                    <i class="fa fa-calendar-check-o" aria-hidden="true"/>
+                                    <span>No activity for this date</span>
+                                </div>
+                            </div>
+
+                            <footer>
+                                <a t-att-href="group['all_url']">
+                                    View all
+                                    <t t-if="group['total']">
+                                        (<t t-out="group['total']"/>)
+                                    </t>
+                                    <i class="fa fa-arrow-right" aria-hidden="true"/>
+                                </a>
+                            </footer>
+                        </article>
+                    </div>
+
+                    <div t-if="not activity_groups" class="bpd-activity-no-results">
+                        <i class="fa fa-calendar-times-o" aria-hidden="true"/>
+                        <span>No activity is available for this category and date.</span>
+                    </div>
+                </section>
+
+                <div t-if="not cards" class="bpd-empty-state">
+                    <i class="fa fa-folder-open-o" aria-hidden="true"/>
+                    <h2>No dashboard sections are available</h2>
+                    <p>Ask your administrator to review the portal dashboard settings.</p>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_business_activity" name="Business Activity">
+        <t t-call="portal.portal_layout">
+            <div class="bpd-shell py-4 py-lg-5">
+                <section class="bpd-page-heading">
+                    <div>
+                        <a href="/my/business-dashboard" class="bpd-back-link">
+                            <i class="fa fa-angle-left" aria-hidden="true"/>
+                            Dashboard
+                        </a>
+                        <h1>
+                            <t t-out="activity_group['title']"/>
+                            activity
+                        </h1>
+                        <p>
+                            All documents updated on
+                            <strong t-out="activity_date_display" t-options="{'widget': 'date'}"/>.
+                        </p>
+                    </div>
+                </section>
+
+                <form method="get" action="/my/business-activity" class="bpd-list-toolbar">
+                    <input type="hidden" name="category" t-att-value="activity_category"/>
+                    <div class="bpd-field">
+                        <label for="activity_page_date">Activity date</label>
+                        <input id="activity_page_date" type="date" name="activity_date" class="form-control" t-att-value="activity_date" t-att-max="activity_today"/>
+                    </div>
+                    <div class="bpd-field bpd-field--search">
+                        <label for="activity_search">Search</label>
+                        <input id="activity_search" type="search" name="search" class="form-control" t-att-value="search" placeholder="Reference or customer reference"/>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        Apply filters
+                    </button>
+                </form>
+
+                <section class="bpd-table-card">
+                    <div class="bpd-table-title d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="bpd-section-kicker">ACTIVITY</span>
+                            <h2>
+                                <t t-out="activity_group['title']"/>
+                                updates
+                            </h2>
+                        </div>
+                        <span class="badge text-bg-light">
+                            <t t-out="activity_group['total']"/>
+                            record(s)
+                        </span>
+                    </div>
+
+                    <div t-if="activity_group['items']" class="list-group list-group-flush">
+                        <a t-foreach="activity_group['items']" t-as="activity" t-key="activity['key']" t-att-href="activity['url']" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between gap-3 py-3">
+                            <div class="min-w-0">
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <strong t-out="activity['title']"/>
+                                    <span class="badge rounded-pill text-bg-light" t-out="activity['status']"/>
+                                </div>
+                                <span class="d-block text-muted small mt-1" t-out="activity['description']"/>
+                                <time class="d-block text-muted small mt-1" t-out="activity['date']" t-options="{'widget': 'datetime'}"/>
+                            </div>
+                            <i class="fa fa-angle-right text-muted" aria-hidden="true"/>
+                        </a>
+                    </div>
+
+                    <div t-else="" class="bpd-empty-state border-0 mt-0">
+                        <i class="fa fa-calendar-o" aria-hidden="true"/>
+                        <h2>No activity found</h2>
+                        <p>Try another date or search term.</p>
+                    </div>
+                </section>
+
+                <t t-call="portal.pager"/>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_account_statement" name="Account Statement and Aging">
+        <t t-call="portal.portal_layout">
+            <div class="bpd-shell bpd-statement-page py-4 py-lg-5">
+                <section class="bpd-page-heading bpd-statement-heading">
+                    <div>
+                        <a href="/my/business-dashboard" class="bpd-back-link">
+                            <i class="fa fa-angle-left" aria-hidden="true"/>
+                            Dashboard
+                        </a>
+                        <span class="bpd-section-kicker">ACCOUNTING</span>
+                        <h1 t-out="statement_label"/>
+                        <p>
+                            Review ledger movements, current balance and invoice aging.
+                        </p>
+                    </div>
+                    <a t-att-href="export_url" class="btn btn-outline-primary bpd-statement-export">
+                        <i class="fa fa-download me-2" aria-hidden="true"/>
+                        Download CSV
+                    </a>
+                </section>
+
+                <form method="get" action="/my/account-statement" class="bpd-statement-filters">
+                    <div t-if="len(statement_type_options) &gt; 1" class="bpd-field">
+                        <label for="statement_type">Statement type</label>
+                        <select id="statement_type" name="statement_type" class="form-select">
+                            <option
+                                t-foreach="statement_type_options"
+                                t-as="type_item"
+                                t-key="type_item['key']"
+                                t-att-value="type_item['key']"
+                                t-att-selected="statement_type == type_item['key']"
+                                t-out="type_item['label']"
+                            />
+                        </select>
+                    </div>
+                    <input t-else="" type="hidden" name="statement_type" t-att-value="statement_type"/>
+
+                    <div class="bpd-field">
+                        <label for="statement_date_from">From</label>
+                        <input
+                            id="statement_date_from"
+                            type="date"
+                            name="date_from"
+                            class="form-control"
+                            t-att-value="date_from"
+                            t-att-max="today"
+                        />
+                    </div>
+                    <div class="bpd-field">
+                        <label for="statement_date_to">To</label>
+                        <input
+                            id="statement_date_to"
+                            type="date"
+                            name="date_to"
+                            class="form-control"
+                            t-att-value="date_to"
+                            t-att-max="today"
+                        />
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        Apply filters
+                    </button>
+                </form>
+
+                <section class="bpd-statement-summary" aria-label="Statement summary">
+                    <article class="bpd-statement-summary__card">
+                        <span>Opening balance</span>
+                        <strong
+                            t-out="opening_balance"
+                            t-options="{'widget': 'monetary', 'display_currency': statement_currency}"
+                        />
+                    </article>
+                    <article class="bpd-statement-summary__card bpd-statement-summary__card--charge">
+                        <span>Charges</span>
+                        <strong
+                            t-out="period_charges"
+                            t-options="{'widget': 'monetary', 'display_currency': statement_currency}"
+                        />
+                    </article>
+                    <article class="bpd-statement-summary__card bpd-statement-summary__card--payment">
+                        <span>Payments / Credits</span>
+                        <strong
+                            t-out="period_payments"
+                            t-options="{'widget': 'monetary', 'display_currency': statement_currency}"
+                        />
+                    </article>
+                    <article class="bpd-statement-summary__card bpd-statement-summary__card--closing">
+                        <span>Closing balance</span>
+                        <strong
+                            t-out="closing_balance"
+                            t-options="{'widget': 'monetary', 'display_currency': statement_currency}"
+                        />
+                    </article>
+                </section>
+
+                <section class="bpd-aging-panel">
+                    <header class="bpd-aging-panel__header">
+                        <div>
+                            <span class="bpd-section-kicker">CURRENT AGING</span>
+                            <h2>Outstanding by age</h2>
+                            <p>
+                                Current unpaid documents as of
+                                <strong t-out="aging['date']" t-options="{'widget': 'date'}"/>.
+                            </p>
+                        </div>
+                        <div class="bpd-aging-total">
+                            <span>Total outstanding</span>
+                            <strong
+                                t-out="aging['total']"
+                                t-options="{'widget': 'monetary', 'display_currency': statement_currency}"
+                            />
+                        </div>
+                    </header>
+
+                    <div class="bpd-aging-grid">
+                        <article
+                            t-foreach="aging['buckets']"
+                            t-as="bucket"
+                            t-key="bucket['key']"
+                            t-attf-class="bpd-aging-card bpd-aging-card--#{bucket['key']}"
+                        >
+                            <span class="bpd-aging-card__label" t-out="bucket['label']"/>
+                            <strong
+                                t-out="bucket['amount']"
+                                t-options="{'widget': 'monetary', 'display_currency': statement_currency}"
+                            />
+                            <small>
+                                <t t-out="bucket['count']"/> document(s)
+                            </small>
+                        </article>
+                    </div>
+                </section>
+
+                <section class="bpd-table-card bpd-statement-table">
+                    <div class="bpd-table-title d-flex justify-content-between align-items-center gap-3">
+                        <div>
+                            <span class="bpd-section-kicker">STATEMENT</span>
+                            <h2>Ledger movements</h2>
+                        </div>
+                        <span class="badge text-bg-light">
+                            <t t-out="statement_total"/> record(s)
+                        </span>
+                    </div>
+
+                    <div t-if="statement_rows" class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Reference</th>
+                                    <th>Description</th>
+                                    <th>Due date</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Charges</th>
+                                    <th class="text-end">Payments / Credits</th>
+                                    <th class="text-end">Balance</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="statement_rows" t-as="row" t-key="row['id']">
+                                    <td t-out="row['date']" t-options="{'widget': 'date'}"/>
+                                    <td>
+                                        <strong t-out="row['reference']"/>
+                                        <small class="d-block text-muted mt-1" t-out="row['document_type']"/>
+                                    </td>
+                                    <td t-out="row['description']"/>
+                                    <td>
+                                        <span t-if="row['due_date']" t-out="row['due_date']" t-options="{'widget': 'date'}"/>
+                                        <span t-else="">—</span>
+                                    </td>
+                                    <td>
+                                        <span class="bpd-statement-status" t-out="row['status']"/>
+                                    </td>
+                                    <td class="text-end">
+                                        <span
+                                            t-if="row['charge']"
+                                            t-out="row['charge']"
+                                            t-options="{'widget': 'monetary', 'display_currency': statement_currency}"
+                                        />
+                                        <span t-else="">—</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <span
+                                            t-if="row['payment']"
+                                            t-out="row['payment']"
+                                            t-options="{'widget': 'monetary', 'display_currency': statement_currency}"
+                                        />
+                                        <span t-else="">—</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <strong
+                                            t-attf-class="#{'text-danger' if row['running_balance'] &lt; 0 else ''}"
+                                            t-out="row['running_balance']"
+                                            t-options="{'widget': 'monetary', 'display_currency': statement_currency}"
+                                        />
+                                    </td>
+                                    <td class="text-end">
+                                        <a
+                                            t-if="row['url']"
+                                            t-att-href="row['url']"
+                                            class="btn btn-sm btn-outline-primary"
+                                        >
+                                            View
+                                        </a>
+                                        <span t-else="" class="text-muted">—</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div t-else="" class="bpd-empty-state border-0 mt-0">
+                        <i class="fa fa-file-text-o" aria-hidden="true"/>
+                        <h2>No statement movements found</h2>
+                        <p>Try another date range.</p>
+                    </div>
+                </section>
+
+                <t t-call="portal.pager"/>
+            </div>
+        </t>
+    </template>
+
+
+<template id="portal_business_deliveries" name="Portal Deliveries and Receipts">
+        <t t-call="portal.portal_layout">
+            <div class="bpd-shell py-4 py-lg-5">
+                <section class="bpd-page-heading">
+                    <div>
+                        <a href="/my/business-dashboard" class="bpd-back-link">
+                            <i class="fa fa-angle-left" aria-hidden="true"/> Dashboard
+                        </a>
+                        <h1>
+                            <t t-if="direction == 'all'">Deliveries &amp; Receipts</t>
+                            <t t-elif="direction == 'outgoing'">Deliveries</t>
+                            <t t-else="">Receipts</t>
+                        </h1>
+                        <p>Track scheduled, ready, late and completed transfers.</p>
+                    </div>
+                </section>
+
+                <form method="get" action="/my/business-deliveries" class="bpd-list-toolbar">
+                    <div t-if="len(allowed_directions) &gt; 1" class="bpd-field">
+                        <label for="direction">Type</label>
+                        <select id="direction" name="direction" class="form-select">
+                            <option value="all" t-att-selected="direction == 'all'">All Transfers</option>
+                            <option value="outgoing" t-att-selected="direction == 'outgoing'">Deliveries</option>
+                            <option value="incoming" t-att-selected="direction == 'incoming'">Receipts</option>
+                        </select>
+                    </div>
+                    <input t-else="" type="hidden" name="direction" t-att-value="direction"/>
+                    <div class="bpd-field">
+                        <label for="status">Status</label>
+                        <select id="status" name="status" class="form-select">
+                            <option value="all" t-att-selected="status == 'all'">All</option>
+                            <option value="pending" t-att-selected="status == 'pending'">Pending</option>
+                            <option value="ready" t-att-selected="status == 'ready'">Ready</option>
+                            <option value="late" t-att-selected="status == 'late'">Late</option>
+                            <option value="done" t-att-selected="status == 'done'">Completed</option>
+                        </select>
+                    </div>
+                    <div class="bpd-field">
+                        <label for="period">Period</label>
+                        <select id="period" name="period" class="form-select">
+                            <t t-foreach="period_labels.items()" t-as="period_item" t-key="period_item[0]">
+                                <option t-att-value="period_item[0]" t-att-selected="period_item[0] == selected_period" t-out="period_item[1]"/>
+                            </t>
+                        </select>
+                    </div>
+                    <div class="bpd-field bpd-field--search">
+                        <label for="search">Search</label>
+                        <input id="search" type="search" name="search" class="form-control" t-att-value="search" placeholder="Transfer or source reference"/>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Apply filters</button>
+                </form>
+
+                <div t-if="pickings" class="bpd-table-card">
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Reference</th>
+                                    <th>Type</th>
+                                    <th>Source</th>
+                                    <th>Scheduled</th>
+                                    <th>Status</th>
+                                    <th>Progress</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="picking_rows" t-as="row" t-key="row['picking'].id">
+                                    <t t-set="picking" t-value="row['picking']"/>
+                                    <td>
+                                        <strong t-out="picking.name"/>
+                                        <small t-if="row['late_days']" class="d-block text-danger mt-1">
+                                            <i class="fa fa-clock-o me-1" aria-hidden="true"/>
+                                            <t t-out="row['late_days']"/> day(s) late
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <span
+                                            t-if="picking.picking_type_code == 'outgoing'"
+                                            class="badge rounded-pill text-bg-primary"
+                                        >
+                                            Delivery
+                                        </span>
+                                        <span t-else="" class="badge rounded-pill text-bg-info">
+                                            Receipt
+                                        </span>
+                                    </td>
+                                    <td t-out="picking.origin or '—'"/>
+                                    <td>
+                                        <span t-field="picking.scheduled_date" t-options="{'widget': 'datetime'}"/>
+                                    </td>
+                                    <td>
+                                        <span t-attf-class="bpd-status bpd-status--#{picking.state}" t-out="delivery_state_labels.get(picking.state, picking.state)"/>
+                                    </td>
+                                    <td class="bpd-progress-cell">
+                                        <div class="bpd-progress-row">
+                                            <span><t t-out="row['processed_qty']"/> / <t t-out="row['planned_qty']"/></span>
+                                            <strong><t t-out="row['progress']"/>%</strong>
+                                        </div>
+                                        <div class="bpd-progress-track" role="progressbar" t-att-aria-valuenow="row['progress']" aria-valuemin="0" aria-valuemax="100">
+                                            <span t-attf-style="width: #{row['progress']}%;"/>
+                                        </div>
+                                    </td>
+                                    <td class="text-end">
+                                        <a t-attf-href="/my/business-deliveries/#{picking.id}" class="btn btn-sm btn-outline-primary">
+                                            View details
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div t-else="" class="bpd-empty-state">
+                    <i class="fa fa-truck" aria-hidden="true"/>
+                    <h2>No transfers found</h2>
+                    <p>Try another status, date period or search term.</p>
+                </div>
+
+                <t t-call="portal.pager"/>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_business_delivery_detail" name="Portal Delivery Detail">
+        <t t-call="portal.portal_layout">
+            <div class="bpd-shell py-4 py-lg-5">
+                <section class="bpd-page-heading bpd-page-heading--detail">
+                    <div>
+                        <a href="/my/business-deliveries" class="bpd-back-link">
+                            <i class="fa fa-angle-left" aria-hidden="true"/> Transfers
+                        </a>
+                        <div class="d-flex align-items-center gap-3 flex-wrap">
+                            <h1 class="mb-0" t-out="picking.name"/>
+                            <span t-attf-class="bpd-status bpd-status--#{picking.state}" t-out="delivery_state_labels.get(picking.state, picking.state)"/>
+                        </div>
+                        <p t-if="picking.origin">Source: <strong t-out="picking.origin"/></p>
+                    </div>
+                </section>
+
+                <section class="bpd-delivery-tracker">
+                    <div class="bpd-delivery-tracker__top">
+                        <div>
+                            <span class="bpd-section-kicker">DELIVERY PROGRESS</span>
+                            <h2><t t-out="delivery_progress['progress']"/>% processed</h2>
+                            <p>
+                                <t t-out="delivery_progress['processed_qty']"/>
+                                of
+                                <t t-out="delivery_progress['planned_qty']"/>
+                                units processed
+                            </p>
+                        </div>
+                        <span t-if="delivery_progress['late_days']" class="bpd-late-pill">
+                            <i class="fa fa-clock-o" aria-hidden="true"/>
+                            <t t-out="delivery_progress['late_days']"/> day(s) late
+                        </span>
+                    </div>
+
+                    <div class="bpd-progress-track bpd-progress-track--large" role="progressbar" t-att-aria-valuenow="delivery_progress['progress']" aria-valuemin="0" aria-valuemax="100">
+                        <span t-attf-style="width: #{delivery_progress['progress']}%;"/>
+                    </div>
+
+                    <div class="bpd-delivery-steps">
+                        <div t-foreach="delivery_progress['steps']" t-as="step" t-key="step_index" t-attf-class="bpd-delivery-step #{'is-done' if step['done'] else ''} #{'is-current' if step['current'] else ''}">
+                            <span class="bpd-delivery-step__dot">
+                                <i t-if="step['done']" class="fa fa-check" aria-hidden="true"/>
+                            </span>
+                            <strong t-out="step['label']"/>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="bpd-detail-grid">
+                    <article class="bpd-detail-card">
+                        <span class="bpd-detail-label">Scheduled date</span>
+                        <strong t-field="picking.scheduled_date" t-options="{'widget': 'datetime'}"/>
+                    </article>
+                    <article class="bpd-detail-card">
+                        <span class="bpd-detail-label">Completed date</span>
+                        <strong t-if="picking.date_done" t-field="picking.date_done" t-options="{'widget': 'datetime'}"/>
+                        <strong t-else="">Not completed</strong>
+                    </article>
+                    <article class="bpd-detail-card">
+                        <span class="bpd-detail-label">Delivery address</span>
+                        <strong t-out="picking.partner_id.display_name or '—'"/>
+                    </article>
+                </section>
+
+                <section class="bpd-table-card">
+                    <div class="bpd-table-title">
+                        <div>
+                            <span class="bpd-section-kicker">PRODUCTS</span>
+                            <h2>Transfer lines</h2>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th class="text-end">Planned</th>
+                                    <th class="text-end">Processed</th>
+                                    <th>Unit</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="moves" t-as="move" t-key="move.id">
+                                    <td>
+                                        <strong t-out="move.product_id.display_name"/>
+                                        <small t-if="move.description_picking" class="d-block text-muted" t-out="move.description_picking"/>
+                                    </td>
+                                    <td class="text-end" t-out="move.product_uom_qty"/>
+                                    <td class="text-end" t-out="move.quantity"/>
+                                    <td t-out="move.product_uom.name"/>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_business_search" name="Business Portal Global Search">
+        <t t-call="portal.portal_layout">
+            <div class="bpd-shell py-4 py-lg-5">
+                <section class="bpd-page-heading">
+                    <a href="/my/business-dashboard" class="bpd-back-link">
+                        <i class="fa fa-angle-left" aria-hidden="true"/>
+                        Dashboard
+                    </a>
+                    <h1>Find or browse documents</h1>
+                    <p>Browse a selected category or search by product, description, reference or source.</p>
+                </section>
+
+                <form action="/my/business-search" method="get" class="bpd-search-page-form">
+                    <select
+                        name="category"
+                        class="form-select bpd-global-search-category"
+                        aria-label="Search category"
+                    >
+                        <option
+                            t-foreach="search_categories"
+                            t-as="category_item"
+                            t-key="category_item['key']"
+                            t-att-value="category_item['key']"
+                            t-att-selected="category_item['key'] == search_category"
+                            t-out="category_item['label']"
+                        />
+                    </select>
+
+                    <span class="bpd-search-page-form__icon">
+                        <i class="fa fa-search" aria-hidden="true"/>
+                    </span>
+
+                    <input
+                        type="search"
+                        name="q"
+                        class="form-control"
+                        t-att-value="search_query"
+                        placeholder="Optional: product, description, reference or source..."
+                        maxlength="100"
+                        autofocus="autofocus"
+                        autocomplete="off"
+                    />
+
+                    <button type="submit" class="btn btn-primary">Find / Browse</button>
+                </form>
+
+                <div t-if="search_too_short" class="bpd-search-message">
+                    <i class="fa fa-info-circle" aria-hidden="true"/>
+                    <span>
+                        Enter at least two characters. You can search by product,
+                        description, reference or source.
+                    </span>
+                </div>
+
+                <div t-if="browse_category_required" class="bpd-search-message">
+                    <i class="fa fa-folder-open-o" aria-hidden="true"/>
+                    <span>
+                        Select a specific category to browse without a keyword,
+                        or enter a keyword to search All Documents.
+                    </span>
+                </div>
+
+                <header
+                    t-if="search_performed and not search_too_short and not browse_category_required"
+                    class="bpd-search-summary"
+                >
+                    <div>
+                        <span class="bpd-section-kicker">
+                            <t t-if="browse_mode">BROWSE DOCUMENTS</t>
+                            <t t-else="">SEARCH RESULTS</t>
+                        </span>
+                        <h2>
+                            <t t-if="browse_mode">
+                                Browsing <t t-out="search_category_label"/>
+                            </t>
+                            <t t-else="">
+                                Results in <t t-out="search_category_label"/>
+                                for “<t t-out="search_query"/>”
+                            </t>
+                        </h2>
+                        <p t-if="browse_mode" class="bpd-search-mode-note">
+                            Latest portal-accessible records from the selected category.
+                        </p>
+                    </div>
+                    <span class="bpd-search-total">
+                        <t t-out="search_total"/> record(s)
+                    </span>
+                </header>
+
+                <div t-if="search_groups" class="bpd-search-groups">
+                    <section
+                        t-foreach="search_groups"
+                        t-as="group"
+                        t-key="group['key']"
+                        t-attf-class="bpd-search-group bpd-search-group--#{group['tone']}"
+                    >
+                        <header class="bpd-search-group__header">
+                            <div class="bpd-search-group__title">
+                                <span class="bpd-search-group__icon">
+                                    <i t-attf-class="fa #{group['icon']}" aria-hidden="true"/>
+                                </span>
+                                <div>
+                                    <h3 t-out="group['title']"/>
+                                    <small>
+                                        Showing <t t-out="len(group['items'])"/> of
+                                        <t t-out="group['total']"/>
+                                    </small>
+                                </div>
+                            </div>
+                            <a t-att-href="group['module_url']" class="bpd-search-group__open">
+                                Open section
+                                <i class="fa fa-arrow-right" aria-hidden="true"/>
+                            </a>
+                        </header>
+
+                        <div class="bpd-search-results-list">
+                            <a
+                                t-foreach="group['items']"
+                                t-as="item"
+                                t-key="item['key']"
+                                t-att-href="item['url']"
+                                class="bpd-search-result"
+                            >
+                                <div class="bpd-search-result__main">
+                                    <strong t-out="item['title']"/>
+                                    <span t-out="item['description']"/>
+                                </div>
+                                <div class="bpd-search-result__meta">
+                                    <span class="bpd-search-result__status" t-out="item['status']"/>
+                                    <small t-if="item.get('date')" t-out="item['date']"/>
+                                </div>
+                                <div t-if="item.get('currency')" class="bpd-search-result__amount">
+                                    <span
+                                        t-out="item.get('amount', 0.0)"
+                                        t-options="{
+                                            'widget': 'monetary',
+                                            'display_currency': item['currency']
+                                        }"
+                                    />
+                                </div>
+                                <i class="fa fa-angle-right bpd-search-result__arrow" aria-hidden="true"/>
+                            </a>
+                        </div>
+                    </section>
+                </div>
+
+                <div
+                    t-if="search_performed and not search_too_short and not browse_category_required and not search_groups"
+                    class="bpd-search-empty"
+                >
+                    <span class="bpd-search-empty__icon">
+                        <i class="fa fa-search" aria-hidden="true"/>
+                    </span>
+                    <h2>No records found</h2>
+                    <p>
+                        No <t t-out="search_category_label"/> matched
+                        “<t t-out="search_query"/>”.
+                    </p>
+                    <span>Try a product name, description, reference or source.</span>
+                </div>
+            </div>
+        </t>
+    </template>
+
+
+    <template id="portal_business_notifications" name="Business Portal Notifications">
+        <t t-call="portal.portal_layout">
+            <div class="bpd-shell bpd-notification-page py-4 py-lg-5">
+                <section class="bpd-page-heading bpd-notification-page-heading">
+                    <div>
+                        <a href="/my/business-dashboard" class="bpd-back-link">
+                            <i class="fa fa-angle-left" aria-hidden="true"/>
+                            Dashboard
+                        </a>
+                        <h1>Notifications</h1>
+                        <p>Document updates, reminders and items that need your attention.</p>
+                    </div>
+                    <div class="bpd-notification-page-heading__actions">
+                        <a href="/my/business-notification-preferences" class="btn btn-outline-secondary">
+                            <i class="fa fa-cog" aria-hidden="true"/>
+                            Preferences
+                        </a>
+                        <form
+                            t-if="notification_unread_count"
+                            action="/my/business-notifications/mark-all-read"
+                            method="post"
+                        >
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa fa-check" aria-hidden="true"/>
+                                Mark all as read
+                            </button>
+                        </form>
+                    </div>
+                </section>
+
+                <section class="bpd-notification-stats">
+                    <article>
+                        <span>Unread</span>
+                        <strong t-out="notification_unread_count"/>
+                    </article>
+                    <article>
+                        <span>Action required</span>
+                        <strong t-out="notification_action_count"/>
+                    </article>
+                    <article>
+                        <span>Current view</span>
+                        <strong t-out="notification_total"/>
+                    </article>
+                </section>
+
+                <nav class="bpd-notification-filters" aria-label="Notification filters">
+                    <a
+                        t-foreach="notification_filters"
+                        t-as="filter_item"
+                        t-key="filter_item['key']"
+                        t-attf-href="/my/business-notifications?filterby=#{filter_item['key']}"
+                        t-attf-class="bpd-notification-filter #{'is-active' if selected_notification_filter == filter_item['key'] else ''}"
+                    >
+                        <i t-attf-class="fa #{filter_item['icon']}" aria-hidden="true"/>
+                        <span t-out="filter_item['label']"/>
+                    </a>
+                </nav>
+
+                <section t-if="notifications" class="bpd-notification-list">
+                    <a
+                        t-foreach="notifications"
+                        t-as="notification"
+                        t-key="notification.id"
+                        t-attf-href="/my/business-notifications/#{notification.id}/open"
+                        t-attf-class="bpd-notification-row bpd-notification-row--#{notification.notification_type} #{'is-unread' if not notification.is_read else ''}"
+                    >
+                        <span class="bpd-notification-row__status"/>
+                        <span class="bpd-notification-row__icon">
+                            <i
+                                t-att-class="'fa %s' % notification_type_meta.get(notification.notification_type, notification_type_meta['info'])['icon']"
+                                aria-hidden="true"
+                            />
+                        </span>
+                        <span class="bpd-notification-row__body">
+                            <span class="bpd-notification-row__topline">
+                                <strong t-out="notification.name"/>
+                                <small t-out="notification.create_date" t-options="{'widget': 'datetime'}"/>
+                            </span>
+                            <span class="bpd-notification-row__message" t-out="notification.message"/>
+                            <span class="bpd-notification-row__meta">
+                                <span t-out="notification_category_meta.get(notification.category, {}).get('label', 'Notification')"/>
+                                <span t-if="notification.document_reference">
+                                    <span aria-hidden="true"> · </span>
+                                    <t t-out="notification.document_reference"/>
+                                </span>
+                                <span t-if="notification.requires_action" class="bpd-notification-action-badge">Action required</span>
+                                <span t-if="notification.email_status in ('sent', 'queued')" class="bpd-notification-email-badge">
+                                    <i class="fa fa-envelope-o" aria-hidden="true"/>
+                                    <t t-if="notification.email_status == 'sent'">Email sent</t>
+                                    <t t-else="">Email queued</t>
+                                </span>
+                            </span>
+                        </span>
+                        <span class="bpd-notification-row__open">
+                            Open
+                            <i class="fa fa-angle-right" aria-hidden="true"/>
+                        </span>
+                    </a>
+                </section>
+
+                <section t-else="" class="bpd-notification-empty">
+                    <span class="bpd-notification-empty__icon">
+                        <i class="fa fa-bell-slash-o" aria-hidden="true"/>
+                    </span>
+                    <h2>No notifications found</h2>
+                    <p>There are no notifications matching this filter.</p>
+                </section>
+
+                <t t-if="pager" t-call="portal.pager"/>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_business_notification_preferences" name="Business Portal Notification Preferences">
+        <t t-call="portal.portal_layout">
+            <div class="bpd-shell bpd-notification-preferences-page py-4 py-lg-5">
+                <section class="bpd-page-heading bpd-notification-page-heading">
+                    <div>
+                        <a href="/my/business-notifications" class="bpd-back-link">
+                            <i class="fa fa-angle-left" aria-hidden="true"/>
+                            Notifications
+                        </a>
+                        <h1>Notification preferences</h1>
+                        <p>Choose which portal alerts and reminder emails your company receives.</p>
+                    </div>
+                </section>
+
+                <div t-if="notification_preferences_saved" class="alert alert-success bpd-preference-saved" role="alert">
+                    <i class="fa fa-check-circle" aria-hidden="true"/>
+                    Your notification preferences have been saved.
+                </div>
+
+                <form
+                    action="/my/business-notification-preferences"
+                    method="post"
+                    class="bpd-notification-preferences"
+                >
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+                    <section class="bpd-preference-card">
+                        <header>
+                            <span class="bpd-preference-card__icon"><i class="fa fa-bell-o" aria-hidden="true"/></span>
+                            <div>
+                                <h2>Delivery channels</h2>
+                                <p>Portal notifications are shown on the dashboard and notification page.</p>
+                            </div>
+                        </header>
+                        <label class="bpd-preference-toggle">
+                            <span>
+                                <strong>Enable notifications</strong>
+                                <small>Master switch for portal alerts and reminder emails.</small>
+                            </span>
+                            <input
+                                type="checkbox"
+                                name="portal_notification_enabled"
+                                t-att-checked="notification_partner.portal_notification_enabled"
+                            />
+                        </label>
+                        <label class="bpd-preference-toggle">
+                            <span>
+                                <strong>Also send emails</strong>
+                                <small>Email important alerts to active portal users when notifications are enabled.</small>
+                            </span>
+                            <input
+                                type="checkbox"
+                                name="portal_email_reminder_enabled"
+                                t-att-checked="notification_partner.portal_email_reminder_enabled"
+                            />
+                        </label>
+                    </section>
+
+                    <section class="bpd-preference-card">
+                        <header>
+                            <span class="bpd-preference-card__icon"><i class="fa fa-sliders" aria-hidden="true"/></span>
+                            <div>
+                                <h2>Notification categories</h2>
+                                <p>Disable any area that is not relevant to your portal work.</p>
+                            </div>
+                        </header>
+                        <div class="bpd-preference-category-grid">
+                            <label class="bpd-preference-check">
+                                <input type="checkbox" name="portal_notify_sales" t-att-checked="notification_partner.portal_notify_sales"/>
+                                <span><i class="fa fa-shopping-cart" aria-hidden="true"/> Sales</span>
+                            </label>
+                            <label class="bpd-preference-check">
+                                <input type="checkbox" name="portal_notify_purchase" t-att-checked="notification_partner.portal_notify_purchase"/>
+                                <span><i class="fa fa-shopping-bag" aria-hidden="true"/> Purchase</span>
+                            </label>
+                            <label class="bpd-preference-check">
+                                <input type="checkbox" name="portal_notify_billing" t-att-checked="notification_partner.portal_notify_billing"/>
+                                <span><i class="fa fa-file-text-o" aria-hidden="true"/> Billing</span>
+                            </label>
+                            <label class="bpd-preference-check">
+                                <input type="checkbox" name="portal_notify_logistics" t-att-checked="notification_partner.portal_notify_logistics"/>
+                                <span><i class="fa fa-truck" aria-hidden="true"/> Logistics</span>
+                            </label>
+                            <label class="bpd-preference-check">
+                                <input type="checkbox" name="portal_notify_projects" t-att-checked="notification_partner.portal_notify_projects"/>
+                                <span><i class="fa fa-check-square-o" aria-hidden="true"/> Projects and tasks</span>
+                            </label>
+                        </div>
+                    </section>
+
+                    <section class="bpd-preference-card">
+                        <header>
+                            <span class="bpd-preference-card__icon"><i class="fa fa-clock-o" aria-hidden="true"/></span>
+                            <div>
+                                <h2>Reminder timing</h2>
+                                <p>The daily scheduled action also sends due-today and selected overdue reminders.</p>
+                            </div>
+                        </header>
+                        <div class="bpd-reminder-grid">
+                            <label>
+                                <span>Invoice reminder</span>
+                                <div class="input-group">
+                                    <input
+                                        type="number"
+                                        name="portal_invoice_reminder_days"
+                                        class="form-control"
+                                        min="1"
+                                        max="30"
+                                        t-att-value="notification_partner.portal_invoice_reminder_days"
+                                    />
+                                    <span class="input-group-text">days before due</span>
+                                </div>
+                            </label>
+                            <label>
+                                <span>Quotation reminder</span>
+                                <div class="input-group">
+                                    <input
+                                        type="number"
+                                        name="portal_quote_reminder_days"
+                                        class="form-control"
+                                        min="1"
+                                        max="30"
+                                        t-att-value="notification_partner.portal_quote_reminder_days"
+                                    />
+                                    <span class="input-group-text">days before expiry</span>
+                                </div>
+                            </label>
+                            <label>
+                                <span>Task reminder</span>
+                                <div class="input-group">
+                                    <input
+                                        type="number"
+                                        name="portal_task_reminder_days"
+                                        class="form-control"
+                                        min="1"
+                                        max="30"
+                                        t-att-value="notification_partner.portal_task_reminder_days"
+                                    />
+                                    <span class="input-group-text">days before deadline</span>
+                                </div>
+                            </label>
+                        </div>
+                    </section>
+
+                    <footer class="bpd-preference-actions">
+                        <a href="/my/business-notifications" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa fa-save" aria-hidden="true"/>
+                            Save preferences
+                        </button>
+                    </footer>
+                </form>
+            </div>
+        </t>
+    </template>
+
+</odoo>

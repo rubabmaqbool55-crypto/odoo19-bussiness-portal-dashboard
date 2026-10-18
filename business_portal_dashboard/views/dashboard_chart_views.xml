@@ -1,0 +1,231 @@
+<odoo>
+<template id="portal_business_dashboard_charts" name="Business Portal Dashboard Charts" inherit_id="business_portal_dashboard.portal_business_dashboard" priority="45">
+<xpath
+    expr="//section[contains(concat(' ', normalize-space(@class), ' '), ' bpd-date-activity ')]"
+    position="after"
+>
+<section
+    class="bpd-analytics-section bpd-charts-root"
+    data-period="12m"
+    aria-labelledby="bpd-analytics-title"
+>
+    <header class="bpd-analytics-heading">
+<div>
+<span class="bpd-section-kicker">ANALYTICS</span>
+<h2 id="bpd-analytics-title">Business performance</h2>
+<p>
+Interactive charts for
+<strong data-chart-period-label="">
+    Last 12 months
+</strong>
+    . Select a chart value to open its related portal records.
+</p>
+</div>
+<div class="bpd-chart-period-control">
+    <label
+        for="bpd_chart_period"
+        class="visually-hidden"
+    >
+        Analytics period
+    </label>
+
+    <select
+        id="bpd_chart_period"
+        class="form-select bpd-chart-period-select"
+        data-chart-period-select=""
+        aria-label="Analytics period"
+    >
+        <option value="7d">
+            Last 7 days
+        </option>
+
+        <option value="30d">
+            Last 30 days
+        </option>
+
+        <option value="90d">
+            Last 90 days
+        </option>
+
+        <option value="month">
+            Current month
+        </option>
+
+        <option value="year">
+            Current year
+        </option>
+
+        <option
+            value="12m"
+            selected="selected"
+        >
+            Last 12 months
+        </option>
+
+        <option value="all">
+            All time
+        </option>
+    </select>
+</div>
+    </header>
+<div class="bpd-chart-loading" data-chart-loading="">
+<span class="bpd-chart-spinner" aria-hidden="true"/>
+<span>Loading dashboard analytics…</span>
+</div>
+<div class="bpd-chart-error" data-chart-error="" hidden="hidden">
+<i class="fa fa-exclamation-triangle" aria-hidden="true"/>
+<span data-chart-error-message="">Dashboard analytics could not be loaded.</span>
+</div>
+<div class="bpd-chart-warning" data-chart-warning="" hidden="hidden">
+<i class="fa fa-info-circle" aria-hidden="true"/>
+<span>Some optional chart sections could not be loaded. Other available analytics are shown below.</span>
+</div>
+<div class="bpd-chart-summary-grid" aria-label="Analytics summary">
+<article class="bpd-chart-summary-card">
+<span data-summary-label="ordered">Ordered</span>
+<strong data-summary-value="ordered">—</strong>
+</article>
+<article class="bpd-chart-summary-card">
+<span data-summary-label="invoiced">Invoiced</span>
+<strong data-summary-value="invoiced">—</strong>
+</article>
+<article class="bpd-chart-summary-card">
+<span data-summary-label="paid">Paid</span>
+<strong data-summary-value="paid">—</strong>
+</article>
+<article class="bpd-chart-summary-card">
+<span data-summary-label="outstanding">Outstanding</span>
+<strong data-summary-value="outstanding">—</strong>
+</article>
+<article class="bpd-chart-summary-card bpd-chart-summary-card--danger">
+<span data-summary-label="overdue">Overdue</span>
+<strong data-summary-value="overdue">—</strong>
+<small data-summary-note="overdue"/>
+</article>
+</div>
+<div class="bpd-chart-grid">
+<article class="bpd-chart-card bpd-chart-card--trend" data-chart-card="trend">
+<header class="bpd-chart-card__header">
+<div>
+<span class="bpd-chart-card__kicker">FINANCIAL TREND</span>
+<h3>Ordered, invoiced and paid</h3>
+<p>Amounts are grouped by document date.</p>
+</div>
+<a href="/my/invoices" class="bpd-chart-card__link">
+View documents
+<i class="fa fa-angle-right" aria-hidden="true"/>
+</a>
+</header>
+<div class="bpd-chart-canvas bpd-chart-canvas--large">
+<canvas data-chart="trend" role="img" aria-label="Ordered, invoiced and paid amount trend"/>
+<div class="bpd-chart-empty" data-chart-empty="trend" hidden="hidden">
+<i class="fa fa-line-chart" aria-hidden="true"/>
+<span>No financial trend data is available for this period.</span>
+</div>
+</div>
+</article>
+<article class="bpd-chart-card" data-chart-card="invoice_status">
+<header class="bpd-chart-card__header">
+<div>
+<span class="bpd-chart-card__kicker">ACCOUNTING</span>
+<h3 data-chart-title="invoice_status">Invoice payment status</h3>
+<p data-chart-meta="invoice_status">Current document distribution</p>
+</div>
+<a href="/my/invoices" class="bpd-chart-card__link">
+View invoices
+<i class="fa fa-angle-right" aria-hidden="true"/>
+</a>
+</header>
+<div class="bpd-chart-canvas">
+<canvas data-chart="invoice_status" role="img" aria-label="Invoice payment status chart"/>
+<div class="bpd-chart-empty" data-chart-empty="invoice_status" hidden="hidden">
+<i class="fa fa-pie-chart" aria-hidden="true"/>
+<span>No invoice data is available for this period.</span>
+</div>
+</div>
+</article>
+<article class="bpd-chart-card" data-chart-card="aging">
+<header class="bpd-chart-card__header">
+<div>
+<span class="bpd-chart-card__kicker">RECEIVABLES</span>
+<h3>Outstanding aging</h3>
+<p data-chart-meta="aging">Current open balance</p>
+</div>
+<a href="/my/account-statement" class="bpd-chart-card__link">
+View statement
+<i class="fa fa-angle-right" aria-hidden="true"/>
+</a>
+</header>
+<div class="bpd-chart-canvas">
+<canvas data-chart="aging" role="img" aria-label="Outstanding balance aging chart"/>
+<div class="bpd-chart-empty" data-chart-empty="aging" hidden="hidden">
+<i class="fa fa-bar-chart" aria-hidden="true"/>
+<span>There is no outstanding balance.</span>
+</div>
+</div>
+</article>
+<article class="bpd-chart-card" data-chart-card="delivery">
+<header class="bpd-chart-card__header">
+<div>
+<span class="bpd-chart-card__kicker">LOGISTICS</span>
+<h3>Delivery performance</h3>
+<p data-chart-meta="delivery">On-time completion rate</p>
+</div>
+<a href="/my/business-deliveries" class="bpd-chart-card__link">
+View transfers
+<i class="fa fa-angle-right" aria-hidden="true"/>
+</a>
+</header>
+<div class="bpd-chart-canvas">
+<canvas data-chart="delivery" role="img" aria-label="On-time and delayed delivery chart"/>
+<div class="bpd-chart-empty" data-chart-empty="delivery" hidden="hidden">
+<i class="fa fa-truck" aria-hidden="true"/>
+<span>No completed transfers are available for this period.</span>
+</div>
+</div>
+</article>
+<article class="bpd-chart-card" data-chart-card="projects">
+<header class="bpd-chart-card__header">
+<div>
+<span class="bpd-chart-card__kicker">PROJECTS</span>
+<h3>Project progress</h3>
+<p data-chart-meta="projects">Completed tasks by project</p>
+</div>
+<a href="/my/projects" class="bpd-chart-card__link">
+View projects
+<i class="fa fa-angle-right" aria-hidden="true"/>
+</a>
+</header>
+<div class="bpd-chart-canvas">
+<canvas data-chart="projects" role="img" aria-label="Project completion progress chart"/>
+<div class="bpd-chart-empty" data-chart-empty="projects" hidden="hidden">
+<i class="fa fa-folder-open-o" aria-hidden="true"/>
+<span>No shared project data is available.</span>
+</div>
+</div>
+</article>
+<article class="bpd-chart-card" data-chart-card="tasks">
+<header class="bpd-chart-card__header">
+<div>
+<span class="bpd-chart-card__kicker">TASKS</span>
+<h3>Task status</h3>
+<p data-chart-meta="tasks">Current visible task workload</p>
+</div>
+<a href="/my/tasks" class="bpd-chart-card__link">
+View tasks
+<i class="fa fa-angle-right" aria-hidden="true"/>
+</a>
+</header>
+<div class="bpd-chart-canvas">
+<canvas data-chart="tasks" role="img" aria-label="Task status distribution chart"/>
+<div class="bpd-chart-empty" data-chart-empty="tasks" hidden="hidden">
+<i class="fa fa-check-square-o" aria-hidden="true"/>
+<span>No task data is available.</span>
+</div>
+</div>
+</article>
+</div>
+</section>
+</xpath>
+</template>
+</odoo>
